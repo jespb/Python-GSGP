@@ -1,2 +1,2 @@
-# Don't track compiled files
-*.pyc
+# Don't track compiled python files
+*pyc
