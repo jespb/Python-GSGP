@@ -15,6 +15,7 @@ from copy import copy
 def getElite(population):
 	return population[:ELITISM_SIZE]
 
+# Currently, this method is not being used
 def getOffspringStyleSTGP(population, normalizedForest):
 	isCross = random()<0.9
 	offspring = []
@@ -43,8 +44,6 @@ def getOffspringStyleSTGP(population, normalizedForest):
 	return offspring
 
 def getOffspring(population, normalizedForest):
-	return getOffspringStyleSTGP(population, normalizedForest)
-	
 	isCross = random()<0.5
 	offspring = []
 
@@ -56,11 +55,6 @@ def getOffspring(population, normalizedForest):
 		parent = tournament(population)
 		osm = mutation(parent, normalizedForest)
 		offspring.extend(osm)
-
-		#cand = []
-		#for i in range(10):
-		#	cand.extend(mutation(parent, normalizedForest))
-		#offspring.append(max(cand))
 		
 	return offspring
 
@@ -90,8 +84,6 @@ def mutation(parent, normalizedForest):
 	weights = copy(parent.weights)
 	tr1=int(random()*POPULATION_SIZE)
 	tr2=int(random()*POPULATION_SIZE)
-
-	MUTATION_STEP = parent.getTrainingRMSE()*random()*10
 
 	weights[POPULATION_SIZE+tr1] += MUTATION_STEP
 	weights[POPULATION_SIZE+tr2] -= MUTATION_STEP

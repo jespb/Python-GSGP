@@ -53,11 +53,15 @@ $ python Main_GSGP.py
 	[-r] 
 		- States the this is a regression problem. 
 		- By default the GSGP tries to classify samples as 0 or 1
+
+	[-runs number_of_runs] 
+		- This flag expects an integer with the number of runs to be made;
+		- By default, this values is set to 30
 	
 	[-tf train_fraction]
 		- This flag expects a float [0;1] with the fraction of the dataset to be used in training;
 		- By default, this value is set to 0.70
 	
 	[-ts tournament_size]
-		- This flag expects an integer with the tournament size or a float with the fraction of the population to be used;
-		- By default, this value is set to 2% of the population size.
+		- This flag expects an integer with the tournament size;
+		- By default, this value is set to 10.

@@ -11,13 +11,13 @@ from sys import argv
 OPERATORS = ["+","-","*","/"]
 MAX_DEPTH = 6 # max depth of the initial trees
 POPULATION_SIZE = 500
-MAX_GENERATION = 100
+MAX_GENERATION = 1000
 TRAIN_FRACTION = 0.70
 TOURNAMENT_SIZE = 10
 ELITISM_SIZE = 1
 SHUFFLE = True
-RUNS = 10
-MUTATION_STEP = 0.01
+RUNS = 30
+MUTATION_STEP = 0.1
 
 
 DATASETS_DIR = "datasets/"
