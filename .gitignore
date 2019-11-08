@@ -1,1 +1,2 @@
-gsgp/__pycache__/*
+# Don't track compiled files
+*.pyc
