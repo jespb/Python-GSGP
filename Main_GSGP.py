@@ -74,7 +74,7 @@ def callgsgp():
 			writeToFile(str(i)+",")
 		writeToFile("\n")
 		
-		attributes= ["Training-Accuracy","Test-Accuracy","Training-RMSE","Test-RMSE","Size","Dimensions","Final_Model"]
+		attributes= ["Training-Accuracy","Test-Accuracy","Training-RMSE","Test-RMSE","Size","Final_Model"]
 		for ai in range(len(toWrite[0])-1):
 			for i in range(len(toWrite)):
 				writeToFile("\n"+attributes[ai]+","+str(i)+",")
