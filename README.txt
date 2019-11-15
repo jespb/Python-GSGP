@@ -65,3 +65,6 @@ $ python Main_GSGP.py
 	[-ts tournament_size]
 		- This flag expects an integer with the tournament size;
 		- By default, this value is set to 10.
+
+Reference:
+    Moraglio A., Krawiec K., Johnson C.G. (2012) Geometric Semantic Genetic Programming. In: Coello C.A.C., Cutello V., Deb K., Forrest S., Nicosia G., Pavone M. (eds) Parallel Problem Solving from Nature - PPSN XII. PPSN 2012. Lecture Notes in Computer Science, vol 7491. Springer, Berlin, Heidelberg
