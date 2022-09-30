@@ -1,8 +1,12 @@
 from .Node import Node
-from .Constants import *
 from .Util import *
 import math
 
+from sklearn.metrics import accuracy_score, f1_score, cohen_kappa_score, mean_squared_error
+
+
+import warnings
+warnings.filterwarnings("ignore")
 
 # 
 # By using this file, you are agreeing to this product's EULA
@@ -13,6 +17,14 @@ import math
 #
 
 class Individual:
+	training_X = None
+	training_Y = None
+	test_X = None
+	test_Y = None
+
+	operators = None
+	terminals = None
+
 	head = None
 	semantics = None
 	normalized = False
@@ -25,40 +37,59 @@ class Individual:
 	testRMSE = None
 
 
-	def __init__(self, node = None, fromString = None, normalized=False, weights=None, semantics = None, static=False):
+#	def __init__(self, operators, terminals, max_depth, node = None, normalized=False, weights=None, semantics = None, static=False):
+	def __init__(self, operators, terminals, max_depth, normalized=False, static=False):
+		self.operators = operators
+		self.terminals = terminals
+		self.max_depth = max_depth
 		self.normalized = normalized
-		if fromString == None:
-			self.head = Node() if node == None else node
-		else:
-			self.head = Node(fromString = fromString.split())
+		self.static = static
+
+	def create(self, weights, rng, semantics = None, Tr_X=None, Tr_Y=None, Te_X=None, Te_Y=None):
+		self.head = Node()
+		self.head.create(rng, self.operators, self.terminals, self.max_depth, full=True)
+		
+		self.training_X = Tr_X
+		self.training_Y = Tr_Y
+		self.test_X = Te_X
+		self.test_Y = Te_Y
+
 		if semantics == None:
 			self.setSemantics()
 		else:
 			self.semantics = semantics
 		self.weights = weights
-		self.static = static
 
-	def predict(self, sample):
-		return 0 if self.calculate(sample) < 0.5 else 1
 
-	def calculate(self, sample):
-		value = self.head.calculate(sample)
+
+	def predict(self, X):
+		values = self.calculate(X)
+		values = self.classifyArray(values)
+		return values
+
+
+	def calculate(self, X):
+		values = list(self.head.calculate(X))
+
 		if self.normalized:
-			value = sigmoid(value)
-		return value
+			for i in range(len(values)):
+				values[i] = sigmoid(values[i])
+		return values
 
 	def setSemantics(self):
-		training = getTrainingSet()
-		test = getTestSet()
 		semantics = []
-		for sample in training:
-			semantics.append(self.calculate(sample))
-		for sample in test:
-			semantics.append(self.calculate(sample))
+		semantics.extend( self.calculate( self.training_X ) )
+		semantics.extend( self.calculate( self.test_X ) )
 		self.semantics = semantics
 
 	def getSemantics(self):
 		return self.semantics
+
+	def getTrainingSemantics(self):
+		return self.semantics[:len(self.training_X)]
+
+	def getTestSemantics(self):
+		return self.semantics[len(self.training_X):]
 
 	def getHead(self):
 		return self.head.clone()
@@ -84,58 +115,73 @@ class Individual:
 		return s
 
 	def __gt__(self,other):
-		return self.getTrainingRMSE() < other.getTrainingRMSE()
+		return self.getFitness() > other.getFitness()
+
+
+	def getFitness(self):
+		return self.getRMSE(self.training_X, self.training_Y) *-1
 
 
 
-	def getTrainingRMSE(self):
-		if self.trainingRMSE == None:
-			ds = getTrainingSet()
+	def getRMSE(self, X,Y,pred=None):
+		'''
+		Returns the individual's accuracy.
+		'''
+		if pred == "Tr":
+			pred = self.getTrainingSemantics()
+		elif pred == "Te":
+			pred = self.getTestSemantics()
+		else:
+			pred = self.predict(X)
 
-			semantics = self.semantics
-			rmse = 0
-			for i in range(len(ds)):
-				rmse += (semantics[i]-ds[i][-1])**2
-			rmse = rmse ** 0.5
-			rmse /= len(semantics)
-			self.trainingRMSE = rmse
-		return self.trainingRMSE
+
+		return  mean_squared_error(pred, Y)**0.5
+
 	
-	def getTestRMSE(self):
-		if self.testRMSE == None:
-			ds = getTestSet()
-			trsize = len(getTrainingSet())
+	def getAccuracy(self, X,Y,pred=None):
+		'''
+		Returns the individual's accuracy.
+		'''
+		if pred == "Tr":
+			pred = self.classifyArray(self.getTrainingSemantics())
+		elif pred == "Te":
+			pred = self.classifyArray(self.getTestSemantics())
+		else:
+			pred = self.predict(X)
 
-			semantics = self.semantics
-			rmse = 0
-			for i in range(len(ds)):
-				rmse += (semantics[i+trsize]-ds[i][-1])**2
-			rmse = rmse ** 0.5
-			rmse /= len(semantics)
-			self.testRMSE = rmse
-		return self.testRMSE
+		return accuracy_score(pred, Y)
 
-	def getTrainingAccuracy(self):
-		if self.trainingAccuracy == None:
-			ds = getTrainingSet()
 
-			semantics = self.semantics
-			hits = 0
-			for i in range(len(ds)):
-				if (semantics[i] < 0.5 and ds[i][-1] == 0) or (semantics[i] >= 0.5 and ds[i][-1] == 1):
-					hits+=1
-			self.trainingAccuracy = hits*100/len(ds)
-		return self.trainingAccuracy
+	def getWaF(self, X, Y,pred=None):
+		'''
+		Returns the individual's WAF.
+		'''
+		if pred == "Tr":
+			pred = self.classifyArray(self.getTrainingSemantics())
+		elif pred == "Te":
+			pred = self.classifyArray(self.getTestSemantics())
+		else:
+			pred = self.predict(X)
 
-	def getTestAccuracy(self):
-		if self.testAccuracy == None:
-			ds = getTestSet()
-			trsize = len(getTrainingSet())
+		return f1_score(pred, Y, average="weighted")
 
-			semantics = self.semantics
-			hits = 0
-			for i in range(len(ds)):
-				if (semantics[i+trsize] < 0.5 and ds[i][-1] == 0) or (semantics[i+trsize] >= 0.5 and ds[i][-1] == 1):
-					hits+=1
-			self.testAccuracy = hits*100/len(ds)
-		return self.testAccuracy
+
+	def getKappa(self, X, Y,pred=None):
+		'''
+		Returns the individual's kappa value.
+		'''
+		if pred == "Tr":
+			pred = self.classifyArray(self.getTrainingSemantics())
+		elif pred == "Te":
+			pred = self.classifyArray(self.getTestSemantics())
+		else:
+			pred = self.predict(X)
+
+		return cohen_kappa_score(pred, Y)
+
+
+	def classifyArray(self, v):
+		v = v[:]
+		for i in range(len(v)):
+			v[i] = 0 if v[i] < 0.5 else 1
+		return v

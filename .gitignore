@@ -1,2 +1,6 @@
 # Don't track compiled python files
 *pyc
+
+# Don't track the results folder
+results/
+datasets/
