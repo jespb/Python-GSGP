@@ -14,7 +14,7 @@ POPULATION_SIZE = 500
 MAX_GENERATION = 1000
 TOURNAMENT_SIZE = 10
 ELITISM_SIZE = 1
-MUTATION_STEP = 0.1
+MUTATION_STEP = 0.01
 THREADS = 1
 VERBOSE = True
 
@@ -25,7 +25,7 @@ TRAIN_FRACTION = 0.70
 DATASETS_DIR = "datasets/"
 OUTPUT_DIR = "results/"
 
-DATASETS = ["heart.csv"]
+DATASETS = ["3w_10a_0.1her.csv", "3w_10a_0.2her.csv", "3w_100a_0.1her.csv", "3w_100a_0.2her.csv"]
 OUTPUT = "Classification"
 
 if "-dsdir" in argv:

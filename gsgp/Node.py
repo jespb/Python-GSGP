@@ -127,7 +127,6 @@ class Node:
 			try:
 				return np.array( sample[self.value] )#.astype("float64")
 			except:
-				print("\n\n\n", sample, "\n\n\n")
 				return np.array( [float(self.value)]*sample.shape[0] )
 
 				
@@ -160,11 +159,7 @@ class Node:
 		'''
 		return self.branches == None
 
-	def getSemantics(self,tr_x):
-		'''
-		Returns the semantic of a Node.
-		'''		
-		return self.calculate(tr_x)
+
 
 	def redirect(self, other):
 		'''
@@ -173,11 +168,13 @@ class Node:
 		self.value = other.value
 		self.branches = other.branches
 
-	def prun(self, tr_x):
+
+
+	def prun(self, X):
 		'''
 		Simplifies this Node
 		'''
-		semantics = self.getSemantics(tr_x)
+		semantics = self.calculate(X)
 		semantics.sort()
 		if semantics[0]== semantics[-1] and len(semantics)>1:
 			self.value = str(semantics[0])
@@ -263,4 +260,4 @@ class Node:
 
 		if self.branches != None:
 			for branch in self.branches:
-				branch.prun(tr_x)
+				branch.prun(X)

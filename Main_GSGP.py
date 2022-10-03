@@ -61,7 +61,7 @@ def run(r,dataset):
 	accuracy  = model.getAccuracyOverTime()
 	waf       = model.getWaFOverTime()
 	kappa     = model.getKappaOverTime()
-	mse       = model.getMSEOverTime()
+	mse       = model.getRMSEOverTime()
 	model_str = str(model.getBestIndividual())
 	times     = model.getGenerationTimes()
 	

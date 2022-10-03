@@ -1,5 +1,4 @@
 from .Node import Node
-from .Util import *
 import math
 
 from sklearn.metrics import accuracy_score, f1_score, cohen_kappa_score, mean_squared_error
@@ -45,9 +44,10 @@ class Individual:
 		self.normalized = normalized
 		self.static = static
 
-	def create(self, weights, rng, semantics = None, Tr_X=None, Tr_Y=None, Te_X=None, Te_Y=None):
-		self.head = Node()
-		self.head.create(rng, self.operators, self.terminals, self.max_depth, full=True)
+	def create(self, weights, rng, semantics = None, Tr_X=None, Tr_Y=None, Te_X=None, Te_Y=None, makeHead=True):
+		if makeHead:
+			self.head = Node()
+			self.head.create(rng, self.operators, self.terminals, self.max_depth, full=True)
 		
 		self.training_X = Tr_X
 		self.training_Y = Tr_Y
@@ -62,10 +62,10 @@ class Individual:
 
 
 
-	def predict(self, X):
-		values = self.calculate(X)
-		values = self.classifyArray(values)
-		return values
+	#def predict(self, X):
+	#	values = self.calculate(X)
+	#	values = self.classifyArray(values)
+	#	return values
 
 
 	def calculate(self, X):
@@ -75,6 +75,9 @@ class Individual:
 			for i in range(len(values)):
 				values[i] = sigmoid(values[i])
 		return values
+
+
+
 
 	def setSemantics(self):
 		semantics = []
@@ -91,8 +94,8 @@ class Individual:
 	def getTestSemantics(self):
 		return self.semantics[len(self.training_X):]
 
-	def getHead(self):
-		return self.head.clone()
+
+
 
 	def getSize(self,forest=None, normalizedForest=None):
 		if self.static:
@@ -119,7 +122,7 @@ class Individual:
 
 
 	def getFitness(self):
-		return self.getRMSE(self.training_X, self.training_Y) *-1
+		return self.getRMSE(self.training_X, self.training_Y, pred="Tr") *-1
 
 
 
@@ -149,6 +152,8 @@ class Individual:
 		else:
 			pred = self.predict(X)
 
+		pred = self.classifyArray(pred)
+
 		return accuracy_score(pred, Y)
 
 
@@ -162,6 +167,8 @@ class Individual:
 			pred = self.classifyArray(self.getTestSemantics())
 		else:
 			pred = self.predict(X)
+
+		pred = self.classifyArray(pred)
 
 		return f1_score(pred, Y, average="weighted")
 
@@ -177,6 +184,8 @@ class Individual:
 		else:
 			pred = self.predict(X)
 
+		pred = self.classifyArray(pred)
+
 		return cohen_kappa_score(pred, Y)
 
 
@@ -185,3 +194,13 @@ class Individual:
 		for i in range(len(v)):
 			v[i] = 0 if v[i] < 0.5 else 1
 		return v
+
+
+
+def sigmoid(x):
+	# Avoids overflow on the math.exp() function
+	if x < -100:
+		return 0
+	if x > 100:
+		return 1
+	return 1 / ( 1 + math.exp(-x) )

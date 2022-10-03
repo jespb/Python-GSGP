@@ -327,7 +327,7 @@ class GSGP:
 		# Debug
 		if self.verbose and self.currentGeneration%5==0:
 			if not self.Te_x is None:
-				print("   > Gen #%2d:  Fitness: %.6f // Tr-Score: %.6f // Te-Score: %.6f  // Time: %.4f" % (self.currentGeneration, self.bestIndividual.getFitness(), self.bestIndividual.getAccuracy(self.Tr_x, self.Tr_y), self.bestIndividual.getAccuracy(self.Te_x, self.Te_y), end- begin )  )
+				print("   > Gen #%2d:  Fitness: %.6f // Tr-Score: %.6f // Te-Score: %.6f  // Time: %.4f" % (self.currentGeneration, self.bestIndividual.getFitness(), self.bestIndividual.getAccuracy(self.Tr_x, self.Tr_y, pred="Tr"), self.bestIndividual.getAccuracy(self.Te_x, self.Te_y, pred="Te"), end- begin )  )
 			else:
 				print("   > Gen #%2d:  Fitness: %.6f // Tr-Score: %.6f // Time: %.4f" % (self.currentGeneration, self.bestIndividual.getFitness(),  self.bestIndividual.getTrainingMeasure(), end- begin )  )
 
