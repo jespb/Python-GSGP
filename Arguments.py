@@ -5,7 +5,7 @@ from sys import argv
 #
 # This product can be obtained in https://github.com/jespb/Python-GSGP
 #
-# Copyright ©2019 J. E. Batista
+# Copyright ©2019-2023 J. E. Batista
 #
 
 OPERATORS = [("+",2),("-",2),("*",2),("/",2)]
@@ -25,7 +25,7 @@ TRAIN_FRACTION = 0.70
 DATASETS_DIR = "datasets/"
 OUTPUT_DIR = "results/"
 
-DATASETS = ["3w_10a_0.1her.csv", "3w_10a_0.2her.csv", "3w_100a_0.1her.csv", "3w_100a_0.2her.csv"]
+DATASETS = ["heart.csv"]
 OUTPUT = "Classification"
 
 if "-dsdir" in argv:

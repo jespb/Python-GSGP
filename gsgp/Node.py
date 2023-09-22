@@ -1,16 +1,11 @@
 import numpy as np
 
-from math import log
-
-import warnings
-warnings.filterwarnings("ignore")
-
 # 
 # By using this file, you are agreeing to this product's EULA
 #
 # This product can be obtained in https://github.com/jespb/Python-M3GP
 #
-# Copyright ©2019-2022 J. E. Batista
+# Copyright ©2019-2023 J. E. Batista
 #
 
 class Node:
@@ -79,10 +74,8 @@ class Node:
 		if value == None:
 			value = rng.randint(0,self.getSize()-1)
 		if value == 0:
-			#print(self)
 			return self
 
-		#print(value, self)
 		for i in range(len(self.branches)):
 			size = self.branches[i].getSize()
 			if value-1 < size:
@@ -183,6 +176,7 @@ class Node:
 
 
 		if self.branches!=None and len(self.branches)==1: # [log2]
+			# Not implemented
 			pass
 
 
@@ -253,6 +247,7 @@ class Node:
 
 
 		if self.branches!=None and len(self.branches)==3: # [max]
+			# Not implemented
 			pass
 
 

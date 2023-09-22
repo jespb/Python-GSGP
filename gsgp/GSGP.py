@@ -1,7 +1,7 @@
 from .Individual import Individual
 from .Node import Node
 from .GeneticOperators import *
-from random import Random#random, randint
+from random import Random #random, randint
 import multiprocessing as mp
 import time
 
@@ -10,7 +10,7 @@ import time
 #
 # This product can be obtained in https://github.com/jespb/Python-GSGP
 #
-# Copyright ©2019 J. E. Batista
+# Copyright ©2019-2023 J. E. Batista
 #
 
 class ClassifierNotTrainedError(Exception):
@@ -59,8 +59,8 @@ class GSGP:
 	testWaFOverTime = None
 	trainingKappaOverTime = None
 	testKappaOverTime = None
-	trainingMSEOverTime = None
-	testMSEOverTime = None
+	trainingRMSEOverTime = None
+	testRMSEOverTime = None
 	generationTimes = None
 
 	checkAccuracy = True
@@ -158,7 +158,7 @@ class GSGP:
 		return self.generationTimes
 
 
-	def getFormatedModel(self):
+	def getBestIndividualRepresentation(self):
 		s = ""
 		for i in range(len(self.bestIndividual.weights)):
 			if i < self.population_size:
@@ -193,26 +193,30 @@ class GSGP:
 		self.terminals = list(Tr_x.columns)
 
 
-#	
+	
 		self.forest = []
 		self.normalizedForest = []
 		self.population = []
 		for i in range(self.population_size):
+			# static models, actual individuals with be a linear combination of them
 			ind = Individual(self.operators, self.terminals, self.max_initial_depth, normalized = True,static=True)
 			ind.create(None, self.rng, Tr_X=self.Tr_x, Tr_Y=self.Tr_y, Te_X=self.Te_x, Te_Y = self.Te_y)
 			self.normalizedForest.append(ind)
 
+			# static models, actual individuals with be a linear combination of them
 			ind = Individual(self.operators, self.terminals, self.max_initial_depth,static=True)
 			ind.create(None, self.rng, Tr_X=self.Tr_x, Tr_Y=self.Tr_y, Te_X=self.Te_x, Te_Y = self.Te_y)
 			self.forest.append(ind)
 			
+			# individuals are a weight array of the individuals in "forest" and "normalized forest"
 			weight = [0]*self.population_size*2
 			weight[i]=1
 			tmp = Individual(self.operators, self.terminals, self.max_initial_depth,static=True)
 			tmp.create(weight, self.rng, semantics = ind.getSemantics(), Tr_X=self.Tr_x, Tr_Y=self.Tr_y, Te_X=self.Te_x, Te_Y = self.Te_y)
 			self.population.append(tmp)
-#
 
+
+		# assigning a random individual as the default best one
 		self.bestIndividual = self.population[0]
 
 		if not self.Te_x is None:
@@ -222,9 +226,10 @@ class GSGP:
 			self.testWaFOverTime = []
 			self.trainingKappaOverTime = []
 			self.testKappaOverTime = []
-			self.trainingMSEOverTime = []
-			self.testMSEOverTime = []
+			self.trainingRMSEOverTime = []
+			self.testRMSEOverTime = []
 			self.generationTimes = []
+
 
 		'''
 		Training loop for the algorithm.
@@ -259,11 +264,11 @@ class GSGP:
 					self.testKappaOverTime.append(0)
 
 				if self.checkRMSE:
-					self.trainingMSEOverTime.append(self.bestIndividual.getRMSE(self.Tr_x, self.Tr_y, pred="Tr"))
-					self.testMSEOverTime.append(self.bestIndividual.getRMSE(self.Te_x, self.Te_y, pred="Te"))
+					self.trainingRMSEOverTime.append(self.bestIndividual.getRMSE(self.Tr_x, self.Tr_y, pred="Tr"))
+					self.testRMSEOverTime.append(self.bestIndividual.getRMSE(self.Te_x, self.Te_y, pred="Te"))
 				else:
-					self.trainingMSEOverTime.append(0)
-					self.testMSEOverTime.append(0)
+					self.trainingRMSEOverTime.append(0)
+					self.testRMSEOverTime.append(0)
 				
 				self.generationTimes.append(duration)
 
@@ -276,9 +281,14 @@ class GSGP:
 		Returns True if the stopping criteria was reached.
 		'''
 		genLimit = self.currentGeneration >= self.max_generation
-		perfectTraining = self.bestIndividual.getRMSE(self.Tr_x, self.Tr_y, pred="Tr") == 1
 		
-		return genLimit  or perfectTraining
+		perfectAccuracy = self.checkAccuracy and \
+			self.bestIndividual.getAccuracy(self.Tr_x, self.Tr_y, pred="Tr") == 1
+		
+		perfectRMSE     = self.checkRMSE and \
+			self.bestIndividual.getRMSE(self.Tr_x, self.Tr_y, pred="Tr") == 0
+		
+		return genLimit  or perfectAccuracy or perfectRMSE
 
 
 
@@ -300,7 +310,6 @@ class GSGP:
 					self.population[i].training_X = self.Tr_x
 					self.population[i].training_Y = self.Tr_y
 		else:
-			#[ ind.fit(self.Tr_x, self.Tr_y) for ind in self.population]
 			[ ind.getFitness() for ind in self.population ]
 
 		# Sort the population from best to worse
@@ -310,7 +319,6 @@ class GSGP:
 		# Update best individual
 		if self.population[0] > self.bestIndividual:
 			self.bestIndividual = self.population[0]
-			#self.bestIndividual.prun(min_dim = self.dim_min)
 
 		# Generating Next Generation
 		newPopulation = []
@@ -318,6 +326,8 @@ class GSGP:
 		while len(newPopulation) < self.population_size:
 			offspring = getOffspring(self.rng, self.population, self.normalizedForest, self.tournament_size, self.mutation_step)
 			newPopulation.extend(offspring)
+
+		# Remove exceeding individuals from the population
 		self.population = newPopulation[:self.population_size]
 
 

@@ -7,7 +7,7 @@ from copy import copy
 #
 # This product can be obtained in https://github.com/jespb/Python-GSGP
 #
-# Copyright ©2019 J. E. Batista
+# Copyright ©2019-2023 J. E. Batista
 #
 
 def getElite(population,n):
@@ -19,33 +19,7 @@ def getElite(population,n):
 	'''
 	return population[:n]
 
-# Currently, this method is not being used
-def getOffspringStyleSTGP(population, normalizedForest):
-	isCross = random()<0.9
-	offspring = []
-	if isCross:
-		parents = [tournament(rng, population, tournament_size),tournament(rng, population, tournament_size)]
 
-		osxo = crossover(parents)
-		
-		isMutation = random() < 0.1
-		if isMutation:
-			for i in range(len(osxo)):
-				osxom = mutation(osxo[i], normalizedForest)
-				offspring.extend(osxom)
-		else:
-			offspring.extend( osxo )
-	
-	else:
-		parent = tournament(rng, population, tournament_size)
-		isMutation = random() < 0.1
-		if isMutation:
-			osm = mutation(parent, normalizedForest)
-			offspring.extend(osm)
-		else:
-			offspring.append(parent)
-	
-	return offspring
 
 def getOffspring(rng, population, normalizedForest, tournament_size, mutation_step):
 	isCross = rng.random()<0.5
@@ -105,9 +79,14 @@ def mutation(rng, parent, normalizedForest, mutation_step):
 	tr1=int(rng.random()*pop_size)
 	tr2=int(rng.random()*pop_size)
 
+	#    Reminded: The positions [0, pop_size] refer to normal trees and the positions
+	# [pop_size, 2*pop_size] to normalizes trees. This selects two normalized trees.
+
+	# Update weights
 	weights[pop_size+tr1] += mutation_step
 	weights[pop_size+tr2] -= mutation_step
 
+	# Update semantics
 	semantics = []
 	for i in range(len(parent.semantics)):
 		semantics.append(parent.semantics[i] + mutation_step * (normalizedForest[tr1].semantics[i]-normalizedForest[tr2].semantics[i]))

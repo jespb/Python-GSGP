@@ -12,7 +12,7 @@ warnings.filterwarnings("ignore")
 #
 # This product can be obtained in https://github.com/jespb/Python-GSGP
 #
-# Copyright ©2019 J. E. Batista
+# Copyright ©2019-2023 J. E. Batista
 #
 
 class Individual:
@@ -61,13 +61,6 @@ class Individual:
 		self.weights = weights
 
 
-
-	#def predict(self, X):
-	#	values = self.calculate(X)
-	#	values = self.classifyArray(values)
-	#	return values
-
-
 	def calculate(self, X):
 		values = list(self.head.calculate(X))
 
@@ -77,24 +70,23 @@ class Individual:
 		return values
 
 
-
-
 	def setSemantics(self):
 		semantics = []
 		semantics.extend( self.calculate( self.training_X ) )
 		semantics.extend( self.calculate( self.test_X ) )
 		self.semantics = semantics
 
+
 	def getSemantics(self):
 		return self.semantics
+
 
 	def getTrainingSemantics(self):
 		return self.semantics[:len(self.training_X)]
 
+
 	def getTestSemantics(self):
 		return self.semantics[len(self.training_X):]
-
-
 
 
 	def getSize(self,forest=None, normalizedForest=None):
@@ -108,7 +100,6 @@ class Individual:
 				else:
 					size += normalizedForest[i-len(forest)].getSize() + 2
 		return size
-
 
 
 	def __str__(self):

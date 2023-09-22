@@ -9,19 +9,13 @@ from sklearn.model_selection import train_test_split
 
 import numpy as np
 
-import warnings
-
-warnings.filterwarnings("ignore", category=FutureWarning,
-                        message="From version 0.21, test_size will always complement",
-                        module="sklearn")
-
 
 # 
 # By using this file, you are agreeing to this product's EULA
 #
 # This product can be obtained in https://github.com/jespb/Python-GSGP
 #
-# Copyright ©2019-2022 J. E. Batista
+# Copyright ©2019-2023 J. E. Batista
 #
 
 
@@ -62,7 +56,7 @@ def run(r,dataset):
 	waf       = model.getWaFOverTime()
 	kappa     = model.getKappaOverTime()
 	mse       = model.getRMSEOverTime()
-	model_str = str(model.getBestIndividual())
+	model_str = model.getBestIndividualRepresentation()
 	times     = model.getGenerationTimes()
 	
 	tr_acc     = accuracy[0]
@@ -87,19 +81,20 @@ def run(r,dataset):
 			tr_waf,te_waf,
 			tr_kappa,te_kappa,
 			tr_mse,te_mse,
-			size,dimensions,
 			times,
 			model_str)
 			
 
+
 def callGSGP():
 	try:
+		# Makes the results folder, if it doesn't exist
 		os.makedirs(OUTPUT_DIR)
 	except:
 		pass
 
 	for dataset in DATASETS:
-		outputFilename = OUTPUT_DIR+"m3gp_"+ dataset
+		outputFilename = OUTPUT_DIR+"GSGP_"+ dataset
 		if not os.path.exists(outputFilename):
 			results = []
 
@@ -107,49 +102,53 @@ def callGSGP():
 			for r in range(RUNS):
 				results.append(run(r,dataset))
 
-			# Write output header
-			file = open(outputFilename , "w")
-			file.write("Attribute,Run,")
-			for i in range(MAX_GENERATION):
-				file.write(str(i)+",")
-			file.write("\n")
-		
-			attributes= ["Training-Accuracy","Test-Accuracy",
-						 "Training-WaF", "Test-WaF",
-						 "Training-Kappa", "Test-Kappa",
-						 "Training-MSE", "Test-MSE",
-						 "Time",	
-						 "Final_Model"]
+				#    The result file is update after every run to
+				# avoid losing information if the program crashes
 
-			# Write attributes with value over time
-			for ai in range(len(attributes)-1):
-				for i in range(RUNS):	
-					file.write("\n"+attributes[ai]+","+str(i)+",")
-					file.write( ",".join([str(val) for val in results[i][ai]]))
+				# Write output header
+				file = open(outputFilename , "w")
+				file.write("Attribute,Run,")
+				for i in range(MAX_GENERATION):
+					file.write(str(i)+",")
+				file.write("\n")
+		
+				attributes= ["Training-Accuracy","Test-Accuracy",
+							 "Training-WaF", "Test-WaF",
+							 "Training-Kappa", "Test-Kappa",
+							 "Training-RMSE", "Test-RMSE",
+							 "Time",	
+							 "Final_Model"]
+
+				# Write attributes with value over time
+				for ai in range(len(attributes)-1):
+					for i in range(len(results)):	
+						file.write("\n"+attributes[ai]+","+str(i)+",")
+						file.write( ",".join([str(val) for val in results[i][ai]]))
+					file.write("\n")
+
+				# Write the final models
+				for i in range(len(results)):
+					file.write("\n"+attributes[-1]+","+str(i)+",")
+					file.write(results[i][-1])
 				file.write("\n")
 
-			# Write the final models
-			for i in range(len(results)):
-				file.write("\n"+attributes[-1]+","+str(i)+",")
-				file.write(results[i][-1])
-			file.write("\n")
-
-			# Write some parameters
-			file.write("\n\nParameters")
-			file.write("\nOperators,"+str(OPERATORS))
-			file.write("\nMax Initial Depth,"+str(MAX_DEPTH))
-			file.write("\nPopulation Size,"+str(POPULATION_SIZE))
-			file.write("\nMax Generation,"+str(MAX_GENERATION))
-			file.write("\nTournament Size,"+str(TOURNAMENT_SIZE))
-			file.write("\nElitism Size,"+str(ELITISM_SIZE))
-			file.write("\nWrapped Model,"+MODEL_NAME)
-			file.write("\nThreads,"+str(THREADS))
-			file.write("\nRandom State,"+str(list(range(RUNS))))
-			file.write("\nDataset,"+dataset)
+				# Write some parameters
+				file.write("\n\nParameters")
+				file.write("\nOperators,"+str(OPERATORS))
+				file.write("\nMax Initial Depth,"+str(MAX_DEPTH))
+				file.write("\nPopulation Size,"+str(POPULATION_SIZE))
+				file.write("\nMax Generation,"+str(MAX_GENERATION))
+				file.write("\nTournament Size,"+str(TOURNAMENT_SIZE))
+				file.write("\nElitism Size,"+str(ELITISM_SIZE))
+				file.write("\nThreads,"+str(THREADS))
+				file.write("\nRandom State,"+str(list(range(RUNS))))
+				file.write("\nDataset,"+dataset)
 
 
-			file.close()
+				file.close()
+		
 		else:
+			# If the result file already exists, GSGP won't run.
 			print("Filename: " + outputFilename +" already exists.")
 
 
