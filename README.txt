@@ -66,5 +66,59 @@ $ python Main_GSGP.py
 		- This flag expects an integer with the tournament size;
 		- By default, this value is set to 10.
 
+
+
+How to import this implementation to your project:
+    - Download this repository;
+    - Copy the "gsgp/" directory to your project directory;
+    - import the GSGP class using "from gsgp.GSGP import GSGP".
+
+How to use this implementation:
+    $ from gsgp.GSGP import GSGP
+    $ model = GSGP()
+    $ model.fit( training_x, training_y, test_x (optional), test_y (optional) 
+
+
+
+Arguments for M3GP():
+    operators			-> Operators used by the individual (default: [("+",2),("-",2),("*",2),("/",2)] )
+    max_initial_depth	-> Max initial depths of the individuals (default: 6)
+    population_size		-> Population size (default: 500)
+    max_generation		-> Maximum number of generations (default: 1000)
+    tournament_size		-> Tournament size (default: 5)
+    elitism_size		-> Elitism selection size (default: 1)
+    mutation_step		-> Mutation step value (default: 0.1)
+    threads 			-> Number of CPU threads to be used (default: 1)
+    random_state		-> Random state (default: 42)
+    verbose				-> Console prints during training (default: True)
+
+
+Arguments for model.fit():
+    Tr_X 		-> Training samples
+    Tr_Y 		-> Training labels
+    Te_X 		-> Test samples, used in the standalone version (default: None)
+    Te_Y 		-> Test labels, used in the standalone version (default: None)
+
+
+Useful methods:
+    $ model = GSGP()	-> starts the model;
+    $ model.fit(X, Y)	-> fits the model to the dataset;
+    $ model.predict(X)	-> Returns a list with the prediction of the given dataset. (use after training)
+
+
+
+
+How to edit this implementation:
+    Fitness Function ( gsgp.Individual ):
+        - Change the getFitness() method to use your own fitness function;
+        - This implementation assumes that a higher fitness is always better. To change this, edit the __gt__ method in this class.
+
+
+
+
+
 Reference:
     Moraglio A., Krawiec K., Johnson C.G. (2012) Geometric Semantic Genetic Programming. In: Coello C.A.C., Cutello V., Deb K., Forrest S., Nicosia G., Pavone M. (eds) Parallel Problem Solving from Nature - PPSN XII. PPSN 2012. Lecture Notes in Computer Science, vol 7491. Springer, Berlin, Heidelberg
+
+
+

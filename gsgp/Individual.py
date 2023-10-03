@@ -21,28 +21,31 @@ class Individual:
 	test_X = None
 	test_Y = None
 
-	operators = None
-	terminals = None
+	operators = None # operations allowed for non-terminal nodes
+	terminals = None # Features
 
-	head = None
-	semantics = None
-	normalized = False
-	weights = None
-	static = None
+	head = None # Tree representation of the static (see below) individuals
+	semantics = None # Model output (real values)
+	normalized = False # Normalized individuals have a sigmoid attached to their root
+	weights = None # An individual is a weighted sum of the trees in the population
 
+	# Static = Does this individual belong to the generation 0 trees (immutable)
+	static = None 
+
+	# The results are saved to avoid recalculations
 	trainingAccuracy = None
 	testAccuracy = None
 	trainingRMSE = None
 	testRMSE = None
 
 
-#	def __init__(self, operators, terminals, max_depth, node = None, normalized=False, weights=None, semantics = None, static=False):
 	def __init__(self, operators, terminals, max_depth, normalized=False, static=False):
 		self.operators = operators
 		self.terminals = terminals
 		self.max_depth = max_depth
 		self.normalized = normalized
 		self.static = static
+
 
 	def create(self, weights, rng, semantics = None, Tr_X=None, Tr_Y=None, Te_X=None, Te_Y=None, makeHead=True):
 		if makeHead:

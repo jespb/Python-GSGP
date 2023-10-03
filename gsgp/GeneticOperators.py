@@ -22,7 +22,8 @@ def getElite(population,n):
 
 
 def getOffspring(rng, population, normalizedForest, tournament_size, mutation_step):
-	isCross = rng.random()<0.5
+	# 50/50 of selecting crossover or mutation
+	isCross = rng.random()<0.5 
 	offspring = []
 
 	if isCross:
@@ -55,17 +56,19 @@ def tournament(rng, population,n):
 def crossover(rng, parents):
 	ind1,ind2 = parents
 
-	a = rng.random()
+	a = rng.random() # random value between 0 and 1
+	# offspring = (parent1) * a + (parent2) * (1-a)
 
+	# calculate new weights
 	weights=[]
 	for i in range(len(ind1.weights)):
 		weights.append(ind1.weights[i]*a+ind2.weights[i]*(1-a))
 
+	# calculate new semantic (model output)
 	semantics = []
 	for i in range(len(ind1.semantics)):
 		semantics.append(ind1.semantics[i]*a+ind2.semantics[i]*(1-a))
 	
-	# offspring = (parent1) * a + (parent2) * (1-a)
 	ind = Individual(ind1.operators, ind1.terminals, ind1.max_depth)
 	ind.create(weights, rng, semantics = semantics, Tr_X=ind1.training_X, Tr_Y=ind1.training_Y, Te_X=ind1.test_X, Te_Y=ind1.test_Y)
 
@@ -76,22 +79,23 @@ def crossover(rng, parents):
 def mutation(rng, parent, normalizedForest, mutation_step):
 	pop_size = len(normalizedForest)
 	weights = copy(parent.weights)
-	tr1=int(rng.random()*pop_size)
+	tr1=int(rng.random()*pop_size) # value between 0 and pop_size
 	tr2=int(rng.random()*pop_size)
 
-	#    Reminded: The positions [0, pop_size] refer to normal trees and the positions
+	# offspring = parent + mutation_step * (tr1 - tr2)
+
+	#    Reminder: The positions [0, pop_size] refer to normal trees and the positions
 	# [pop_size, 2*pop_size] to normalizes trees. This selects two normalized trees.
 
-	# Update weights
-	weights[pop_size+tr1] += mutation_step
-	weights[pop_size+tr2] -= mutation_step
+	# calculate new weights
+	weights[pop_size+tr1] += mutation_step # increases the weight of tr1 by the mutation_step value
+	weights[pop_size+tr2] -= mutation_step # decreases the weight of tr2 by the mutation_step value
 
-	# Update semantics
+	# calculate new semantic (model output)
 	semantics = []
 	for i in range(len(parent.semantics)):
 		semantics.append(parent.semantics[i] + mutation_step * (normalizedForest[tr1].semantics[i]-normalizedForest[tr2].semantics[i]))
 	
-	# offspring = parent + ms * (tr1 - tr2)
 	ind = Individual(parent.operators, parent.terminals, parent.max_depth)
 	ind.create(weights, rng, semantics = semantics, Tr_X=parent.training_X, Tr_Y=parent.training_Y, Te_X=parent.test_X, Te_Y=parent.test_Y)
 
